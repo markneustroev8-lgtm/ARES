@@ -1,43 +1,78 @@
 # ARES
  ИИ нового поколения, названный в честь бога войны, чтобы побеждать рутину. Он превращает массивные потоки информации в ваше главное конкурентное преимущество
 import random
+import datetime
+from typing import List, Dict, Optional
 
-class AI_Ares:
-    def __init__(self):
-        self.knowledge_base = []
+class AresAI:
+    def __init__(self, name: str = "ARES"):
+        self.name = name
+        # Используем словарь для быстрого поиска ответов (Ключ: Вопрос, Значение: Ответ)
+        self.brain: Dict[str, str] = {}
+        self.history: List[str] = []
 
-    def learn(self, data):
-        self.knowledge_base.append(data)
+    def _normalize(self, text: str) -> str:
+        """Внутренний метод для очистки входных данных."""
+        return text.strip().lower()
 
-    def respond(self, query):
-        if query in self.knowledge_base:
-            return f"Response based on knowledge: {query}"
+    def learn(self, query: str, answer: str) -> None:
+        """Метод обучения: связывает запрос с конкретным знанием."""
+        normalized_query = self._normalize(query)
+        self.brain[normalized_query] = answer
+        print(f"[{self.name}]: Знание усвоено -> '{query}'")
+
+    def respond(self, query: str) -> str:
+        """Логика принятия решения и поиска ответа."""
+        normalized_query = self._normalize(query)
+        
+        # 1. Проверка в базе знаний
+        if normalized_query in self.brain:
+            response = f"Анализ завершен: {self.brain[normalized_query]}"
         else:
-            return self.generate_response(query)
+            # 2. Если не знает — генерирует творческий ответ
+            response = self._generate_creative_response()
+            
+        self.history.append(f"Q: {query} | A: {response}")
+        return response
 
-    def generate_response(self, query):
-        # Простейшая генерация ответа
-        responses = [
-            "That's an interesting question!",
-            "I need to think about that.",
-            "Can you provide more details?",
-            "Let's explore that topic together."
+    def _generate_creative_response(self) -> str:
+        """Творческая заглушка для неизвестных данных."""
+        scenarios = [
+            "Данных недостаточно для точного прогноза. Требуется дообучение.",
+            "Этот запрос выходит за рамки текущей стратегии. Изучить подробнее?",
+            "Интересный паттерн. Мои алгоритмы пока не нашли совпадений.",
+            "Для победы над этой задачей мне нужно больше контекста."
         ]
-        return random.choice(responses)
+        return random.choice(scenarios)
 
-    def generate_decision(self, options):
-        return random.choice(options)
+    def select_strategy(self, options: List[str]) -> str:
+        """Принятие решения на основе взвешенного выбора (имитация стратегии)."""
+        decision = random.choice(options)
+        return f"Выбрана оптимальная стратегия: {decision}"
 
-    def chat(self, user_input):
-        # Имитация чата
-        if user_input.lower() == "exit":
-            return "Goodbye!"
-        else:
-            return self.respond(user_input)
+    def show_stats(self):
+        """Вывод состояния системы."""
+        print(f"\n--- Статус {self.name} ---")
+        print(f"Объем базы знаний: {len(self.brain)} записей")
+        print(f"Обработано запросов: {len(self.history)}")
+        print("------------------------\n")
 
-# Пример использования
-ares = AI_Ares()
-ares.learn("What is the capital of France?")
-print(ares.chat("What is the capital of France?"))
-print(ares.chat("Tell me about artificial intelligence."))
-print(ares.generate_decision(["Option 1", "Option 2", "Option 3"]))
+# --- Боевое крещение ARES ---
+ares = AresAI()
+
+# Обучаем конкретным фактам
+ares.learn(
+    "Какая главная цель?", 
+    "Превращать хаос информации в стратегическое преимущество."
+)
+ares.learn(
+    "Что такое ИИ?", 
+    "Это инструмент эволюции разума."
+)
+
+# Тестируем интеллект
+print(f"ARES: {ares.respond('КАКАЯ ГЛАВНАЯ ЦЕЛЬ?')}") # Сработает нормализация
+print(f"ARES: {ares.respond('Как мне захватить рынок?')}") # Неизвестный вопрос
+print(f"ARES: {ares.select_strategy(['Агрессивный рост', 'Удержание позиций', 'Масштабирование'])}")
+
+ares.show_stats()
